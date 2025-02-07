@@ -130,12 +130,18 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                     flat_children,
                     expanded_children,
                 } => {
+                    let expanded_children = expanded_children.memoized();
                     write!(
                         f,
-                        [best_fitting![
-                            format_args![flat_children],
-                            format_args![expanded_children]
-                        ]]
+                        [
+                            // If the attribute group breaks, prettier always breaks the children as well.
+                            &if_group_breaks(&expanded_children),
+                            // If the attribute group does NOT break, print whatever fits best for the children.
+                            &if_group_fits_on_line(&best_fitting![
+                                format_args![flat_children],
+                                format_args![expanded_children],
+                            ]),
+                        ]
                     )?;
                 }
             }
